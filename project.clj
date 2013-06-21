@@ -7,5 +7,6 @@
 		[enlive "1.1.1"]]
   :plugins [[lein-ring "0.8.5"]]
   :ring {:handler lp3.handler/app}
+  :min-lein-version "2.0.0"
   :profiles
   {:dev {:dependencies [[ring-mock "0.1.5"]]}})
