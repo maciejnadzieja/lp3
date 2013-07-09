@@ -21,8 +21,6 @@
 (defn fetch-spotify-title [position] (let [song (fetch-spotify-song position)] (if (empty? song) nil (song "href"))))
 (defn spotify-positions [positions] (filter identity (map fetch-spotify-title positions)))
 
-
-
 (defn get-chart-by-number [number] (let [lp3 (fetch-lp3 number)]
     {
    :status 200 :body {
@@ -41,9 +39,12 @@
                   :positions (spotify-positions (fetch-positions number lp3))}
    :headers {"Content-Type" "application/json"}}))
 
+(def chart-cache (memoize get-chart-by-number))
+(def chart-spotified-cache (memoize get-spotified-chart-by-number)) 
+
 (defroutes app-routes
-  (GET ["/lp3/:number", :number #"[0-9]+"] [number] (get-chart-by-number number))
-  (GET ["/lp3/spotify/:number", :number #"[0-9]+"] [number] (get-spotified-chart-by-number number))
+  (GET ["/lp3/:number", :number #"[0-9]+"] [number] (chart-cache number))
+  (GET ["/lp3/spotify/:number", :number #"[0-9]+"] [number] (chart-spotified-cache number))
   (GET ["/"] [] "/lp3/:number - get chart by number<br/>/lp3/spotify/:number - get chart by number with spotify links<br/><br/>http://lp3.polskieradio.pl/notowania/")
   (route/not-found "Not Found"))
 
