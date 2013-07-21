@@ -8,6 +8,9 @@
             [clojure.data.json :as json]
             [net.cgrand.enlive-html :as html]
 	   ))
+(defn fetch-last-lp3 [] (html/html-resource (java.net.URL. "http://lp3.polskieradio.pl/notowania/")))
+(def last-number [:div#numerGlosowania :span.number])
+(defn fetch-number [lp3] (first (first (map :content (html/select lp3 last-number)))))
 
 (defn fetch-lp3 [number] (html/html-resource (java.net.URL. (str "http://lp3.polskieradio.pl/notowania/print.aspx?numer=" number))))
 (def author [:table.bigList :tr :td.aT :span.title :b ])
@@ -43,6 +46,7 @@
 (def chart-spotified-cache (memoize get-spotified-chart-by-number)) 
 
 (defroutes app-routes
+  (GET ["/lp3/last"] [] (fetch-number (fetch-last-lp3)))
   (GET ["/lp3/:number", :number #"[0-9]+"] [number] (chart-cache number))
   (GET ["/lp3/spotify/:number", :number #"[0-9]+"] [number] (chart-spotified-cache number))
   (GET ["/"] [] "/lp3/:number - get chart by number<br/>/lp3/spotify/:number - get chart by number with spotify links<br/><br/>http://lp3.polskieradio.pl/notowania/")
